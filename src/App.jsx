@@ -28,7 +28,7 @@ function App() {
     ],
     [
       { name: "Cours d'eau", image: "/data/cours_deau.png", type: "data" },
-      { name: "Parcellaire_déclaré", image: "/data/parcellaire_declaré.png", type: "data" },
+      { name: "Parcellaire_déclaré", image: "/data/parcellaire_déclaré.png", type: "data" },
       { name: "Intersection", image: "/traitement/intersection.png", type: "processing" },
       { name: "Resultat tampon", image: "/result/tampon.png", type: "result" },
       { name: "Sélection spatiale", image: "/traitement/selection_spatiale.png", type: "processing" },
