@@ -4,7 +4,7 @@ function App() {
   // Cartes disponibles pour le tiroir, réparties par type
   const dataCards = [
     { name: "Cours d'eau", image: "/data/cours_deau.png", type: "data" },
-    { name: "Parcellaire_déclaré", image: "/data/parcellaire_declaré.png", type: "data" },
+    { name: "Parcellaire_déclaré", image: "/data/parcellaire_déclaré.png", type: "data" },
   ];
   const processingCards = [
     { name: "Calculatrice de champ", image: "/traitement/calculatrice_de_champ.png", type: "processing" },
