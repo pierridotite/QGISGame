@@ -27,10 +27,8 @@ function App() {
       { name: "Resultat tampon", image: "/result/tampon.png", type: "result" },
     ],
     [
-      { name: "Cours d'eau", image: "/data/cours_deau.png", type: "data" },
       { name: "Parcellaire_déclaré", image: "/data/parcellaire_déclaré.png", type: "data" },
-      { name: "Intersection", image: "/traitement/intersection.png", type: "processing" },
-      { name: "Sélection spatiale", image: "/traitement/selection_spatiale.png", type: "processing" },
+      { name: "Statistiques par catégorie", image: "/traitement/statistiques_par_categorie.png", type: "processing" },
       { name: "Tableau_stat", image: "/result/tableau_stat.png", type: "result" },
     ],
   ];
