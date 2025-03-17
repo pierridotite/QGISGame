@@ -4,7 +4,7 @@ function App() {
   // Cartes disponibles pour le tiroir, réparties par type
   const dataCards = [
     { name: "Cours d'eau", image: "/data/cours_deau.png", type: "data" },
-    { name: "Parcellaire_déclaré", image: "/data/parcellaire_déclaré.png", type: "data" },
+    { name: "Parcellaire_déclaré", image: "/data/parcellaire_declaré.png", type: "data" },
   ];
   const processingCards = [
     { name: "Calculatrice de champ", image: "/traitement/calculatrice_de_champ.png", type: "processing" },
@@ -27,8 +27,11 @@ function App() {
       { name: "Resultat tampon", image: "/result/tampon.png", type: "result" },
     ],
     [
-      { name: "Parcellaire_déclaré", image: "/data/parcellaire_déclaré.png", type: "data" },
-      { name: "Statistiques par catégorie", image: "/traitement/statistiques_par_categorie.png", type: "processing" },
+      { name: "Cours d'eau", image: "/data/cours_deau.png", type: "data" },
+      { name: "Parcellaire_déclaré", image: "/data/parcellaire_declaré.png", type: "data" },
+      { name: "Intersection", image: "/traitement/intersection.png", type: "processing" },
+      { name: "Resultat tampon", image: "/result/tampon.png", type: "result" },
+      { name: "Sélection spatiale", image: "/traitement/selection_spatiale.png", type: "processing" },
       { name: "Tableau_stat", image: "/result/tableau_stat.png", type: "result" },
     ],
   ];
@@ -38,6 +41,9 @@ function App() {
   const [hiddenIndex, setHiddenIndex] = useState(null);
   const [correctCard, setCorrectCard] = useState(null);
   const [message, setMessage] = useState("");
+
+  // État de zoom (appliqué à la chaîne de traitement)
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   // Par défaut, les sections du tiroir sont fermées
   const [drawerOpen, setDrawerOpen] = useState({
@@ -64,6 +70,18 @@ function App() {
     newBoard[hiddenIndex] = null;
     setBoard(newBoard);
     setMessage("Carte retirée, veuillez déposer une nouvelle carte.");
+  };
+
+  // Sélection par clic dans le tiroir
+  const handleSelectCard = (card) => {
+    if (board[hiddenIndex]) {
+      setMessage("Veuillez retirer la carte actuelle en utilisant le bouton 'Changer la carte' pour en choisir une autre.");
+    } else {
+      const newBoard = [...board];
+      newBoard[hiddenIndex] = card;
+      setBoard(newBoard);
+      setMessage("");
+    }
   };
 
   // Initialisation lors du montage du composant
@@ -121,6 +139,15 @@ function App() {
     });
   };
 
+  // Gestion du zoom
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.1, 2)); // zoom max 2x
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.1, 0.5)); // zoom min 0.5x
+  };
+
   // --- Regroupement de la chaîne de traitement pour affichage desktop ---
   // On regroupe les cartes "data" contiguës afin de les afficher verticalement dans un groupe
   const groupedBoard = [];
@@ -131,7 +158,7 @@ function App() {
     const currentType =
       card !== null
         ? card.type
-        : (i === hiddenIndex && correctCard && correctCard.type === "data")
+        : i === hiddenIndex && correctCard && correctCard.type === "data"
         ? "data"
         : "other";
     if (currentType === "data") {
@@ -175,7 +202,8 @@ function App() {
                     key={idx}
                     draggable
                     onDragStart={(e) => handleDragStart(e, card, "drawer")}
-                    className="p-2 bg-blue-100 rounded-lg cursor-move text-center"
+                    onClick={() => handleSelectCard(card)}
+                    className="p-2 bg-blue-100 rounded-lg cursor-pointer select-none text-center"
                   >
                     <img
                       src={card.image}
@@ -203,7 +231,8 @@ function App() {
                     key={idx}
                     draggable
                     onDragStart={(e) => handleDragStart(e, card, "drawer")}
-                    className="p-2 bg-green-100 rounded-lg cursor-move text-center"
+                    onClick={() => handleSelectCard(card)}
+                    className="p-2 bg-green-100 rounded-lg cursor-pointer select-none text-center"
                   >
                     <img
                       src={card.image}
@@ -231,7 +260,8 @@ function App() {
                     key={idx}
                     draggable
                     onDragStart={(e) => handleDragStart(e, card, "drawer")}
-                    className="p-2 bg-yellow-100 rounded-lg cursor-move text-center"
+                    onClick={() => handleSelectCard(card)}
+                    className="p-2 bg-yellow-100 rounded-lg cursor-pointer select-none text-center"
                   >
                     <img
                       src={card.image}
@@ -251,10 +281,30 @@ function App() {
             Chaîne de traitement
           </h2>
 
+          {/* Contrôles de zoom */}
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={handleZoomOut}
+              className="px-2 py-1 bg-gray-300 rounded-l hover:bg-gray-400"
+            >
+              -
+            </button>
+            <button
+              onClick={handleZoomIn}
+              className="px-2 py-1 bg-gray-300 rounded-r hover:bg-gray-400"
+            >
+              +
+            </button>
+            <span className="ml-2 text-sm">Zoom: {(zoomLevel * 100).toFixed(0)}%</span>
+          </div>
+
           {/* Affichage pour desktop : chaîne en ligne avec scroll horizontal */}
           <div className="hidden md:block">
             <div className="overflow-x-auto">
-              <div className="flex items-center gap-4 flex-nowrap">
+              <div
+                className="flex items-center gap-4 flex-nowrap"
+                style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top left" }}
+              >
                 {groupedBoard.map((group, groupIndex) => (
                   <React.Fragment key={groupIndex}>
                     <div className="flex flex-col items-center">
@@ -289,29 +339,34 @@ function App() {
             </div>
           </div>
 
-          {/* Affichage pour mobile : chaîne verticale avec séparateurs */}
+          {/* Affichage pour mobile : chaîne verticale avec séparateurs et zoom */}
           <div className="flex flex-col md:hidden">
-            {board.map((card, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  className="w-full h-24 border border-gray-300 flex items-center justify-center rounded-lg bg-gray-100"
-                >
-                  {card ? (
-                    <>
-                      <img src={card.image} alt={card.name} className="w-16 h-16 object-contain" />
-                      <p className="text-center text-sm">{card.name}</p>
-                    </>
-                  ) : (
-                    <span className="text-gray-400 text-sm">Carte Cachée</span>
+            <div
+              style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top left" }}
+              className="w-full"
+            >
+              {board.map((card, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <div
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                    className="w-full h-24 border border-gray-300 flex items-center justify-center rounded-lg bg-gray-100"
+                  >
+                    {card ? (
+                      <>
+                        <img src={card.image} alt={card.name} className="w-16 h-16 object-contain" />
+                        <p className="text-center text-sm">{card.name}</p>
+                      </>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Carte Cachée</span>
+                    )}
+                  </div>
+                  {index < board.length - 1 && (
+                    <hr className="w-full my-2 border-t border-gray-300" />
                   )}
                 </div>
-                {index < board.length - 1 && (
-                  <hr className="w-full my-2 border-t border-gray-300" />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Boutons et message de validation */}
